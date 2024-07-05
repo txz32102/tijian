@@ -14,6 +14,7 @@ db_config = {
     'database': 'tijian'
 }
 
+
 # Endpoint for user login
 @app.route('/user/login', methods=['POST'])
 def login():
@@ -74,7 +75,7 @@ def register():
         check_query = "SELECT * FROM user WHERE userId = %s"
         cursor.execute(check_query, (user_data['userId'],))
         existing_user = cursor.fetchone()
-        if existing_user:
+        if (existing_user):
             return jsonify({'code': 1001, 'message': 'User ID already exists'}), 400
 
         insert_query = """
@@ -142,7 +143,43 @@ def get_all_setmeals():
     except mysql.connector.Error as err:
         print(f"Error: {err}")
         return jsonify({'code': 5000, 'message': str(err)}), 500
-    
+
+
+# Endpoint for adding a new order
+@app.route('/orders/add', methods=['POST'])
+def add_order():
+    try:
+        order_data = request.form.to_dict()
+
+        required_fields = ['orderdate', 'userId', 'hpId', 'smId', 'state']
+        if not all(field in order_data for field in required_fields):
+            return jsonify({'code': 4000, 'message': 'Missing required fields'}), 400
+
+        conn = mysql.connector.connect(**db_config)
+        cursor = conn.cursor()
+
+        insert_query = """
+        INSERT INTO orders (orderdate, userId, hpId, smId, state)
+        VALUES (%s, %s, %s, %s, %s)
+        """
+        cursor.execute(insert_query, (
+            order_data['orderdate'], order_data['userId'], order_data['hpId'],
+            order_data['smId'], order_data['state']
+        ))
+        conn.commit()
+
+        cursor.close()
+        conn.close()
+        return jsonify({'code': 1000, 'message': 'Order added successfully'})
+
+    except mysql.connector.Error as err:
+        print(f"Database Error: {err}")
+        return jsonify({'code': 5000, 'message': str(err)}), 500
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({'code': 5000, 'message': str(e)}), 500
+
+
 # Endpoint for fetching reports by userId
 @app.route('/reports/query', methods=['GET'])
 def get_reports():
@@ -229,8 +266,6 @@ def get_report_result():
     except mysql.connector.Error as err:
         print(f"Error: {err}")
         return jsonify({'code': 5000, 'message': str(err)}), 500
-
-
 
 if __name__ == '__main__':
     app.run(port=9080, debug=True)
