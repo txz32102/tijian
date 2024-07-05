@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import mysql.connector
 from flask_cors import CORS
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)
@@ -16,8 +17,8 @@ db_config = {
 # Endpoint for user login
 @app.route('/user/login', methods=['POST'])
 def login():
-    user_id = request.args.get('userId')
-    password = request.args.get('password')
+    user_id = request.form.get('userId')
+    password = request.form.get('password')
     
     if not user_id or not password:
         return jsonify({'code': 4000, 'message': 'User ID and password are required'}), 400
@@ -58,6 +59,13 @@ def register():
         required_fields = ['userId', 'password', 'realName', 'gender', 'identityCard', 'birthday', 'userType']
         if not all(field in user_data for field in required_fields):
             return jsonify({'code': 4000, 'message': 'Missing required fields'}), 400
+
+        # Convert birthday to correct format
+        try:
+            user_data['birthday'] = datetime.strptime(user_data['birthday'], "%Y-%m-%d").strftime("%Y-%m-%d")
+        except ValueError as e:
+            print(f"Date conversion error: {e}")
+            return jsonify({'code': 4002, 'message': 'Invalid date format'}), 400
 
         conn = mysql.connector.connect(**db_config)
         cursor = conn.cursor()
