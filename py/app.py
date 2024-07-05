@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import mysql.connector
 from flask_cors import CORS
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -141,6 +142,94 @@ def get_all_setmeals():
     except mysql.connector.Error as err:
         print(f"Error: {err}")
         return jsonify({'code': 5000, 'message': str(err)}), 500
+    
+# Endpoint for fetching reports by userId
+@app.route('/reports/query', methods=['GET'])
+def get_reports():
+    user_id = request.args.get('userId')
+
+    if not user_id:
+        return jsonify({'code': 4000, 'message': 'User ID is required'}), 400
+
+    try:
+        conn = mysql.connector.connect(**db_config)
+        cursor = conn.cursor(dictionary=True)
+
+        query = """
+        SELECT o.orderId, o.orderDate, s.name 
+        FROM orders o
+        JOIN setmeal s ON o.smId = s.smId
+        WHERE o.userId = %s
+        """
+        cursor.execute(query, (user_id,))
+        reports = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+        return jsonify({'code': 1000, 'data': reports})
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return jsonify({'code': 5000, 'message': str(err)}), 500
+
+
+# Endpoint for fetching detailed result by orderId
+@app.route('/getdetailresult/query', methods=['GET'])
+def get_detail_result():
+    order_id = request.args.get('orderId')
+
+    if not order_id:
+        return jsonify({'code': 4000, 'message': 'Order ID is required'}), 400
+
+    try:
+        conn = mysql.connector.connect(**db_config)
+        cursor = conn.cursor(dictionary=True)
+
+        query = """
+        SELECT cdr.*
+        FROM cidetailedreport cdr
+        WHERE cdr.orderId = %s
+        """
+        cursor.execute(query, (order_id,))
+        details = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+        return jsonify({'code': 1000, 'data': details})
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return jsonify({'code': 5000, 'message': str(err)}), 500
+
+
+# Endpoint for fetching overall result by orderId
+@app.route('/getreportresult/query', methods=['GET'])
+def get_report_result():
+    order_id = request.args.get('id')
+
+    if not order_id:
+        return jsonify({'code': 4000, 'message': 'Order ID is required'}), 400
+
+    try:
+        conn = mysql.connector.connect(**db_config)
+        cursor = conn.cursor(dictionary=True)
+
+        query = """
+        SELECT or.*
+        FROM overallresult or
+        WHERE or.orderId = %s
+        """
+        cursor.execute(query, (order_id,))
+        report = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+        return jsonify({'code': 1000, 'data': report})
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return jsonify({'code': 5000, 'message': str(err)}), 500
+
 
 
 if __name__ == '__main__':
