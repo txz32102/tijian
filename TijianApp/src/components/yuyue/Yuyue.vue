@@ -18,7 +18,7 @@
 		  <div>
 			<p>
 			  <span>营业时间</span>
-			  <span v-text="h.businesshours"></span>
+			  <span v-text="h.businessHours"></span>
 			</p>
 			<p>
 			  <span>采血截止</span>
@@ -65,7 +65,7 @@
 	let hospital = {
 	  hpId: h.hpId,
 	  name: h.name,
-	  businesshours: h.businesshours,
+	  businessHours: h.businessHours,
 	  deadline: h.deadline,
 	  telephone: h.telephone,
 	  address: h.address
@@ -75,9 +75,10 @@
   }
   
   onMounted(() => {
-	axios.get('/hospital/getAll')
+	axios.get('http://localhost:9080/hospital/getAll')
 	  .then((res) => {
-		if (res.data && res.data.length) {
+		console.log(res.data); // 打印获取到的数据
+		if (res.data) {
 		  hs.value = res.data;
 		  console.log("Data fetched successfully:", hs.value);
 		} else {
@@ -90,6 +91,7 @@
 	  });
   });
   </script>
+  
   
   <style scoped>
   #yuyue {
