@@ -25,6 +25,7 @@
             <artifactId>mybatis-spring-boot-starter</artifactId>
             <version>2.2.2</version>
         </dependency>
+
         <!--导入json解析工具包-->
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -51,6 +52,8 @@
             <artifactId>fastjson</artifactId>
             <version>1.2.83_noneautotype</version>
         </dependency>
+        <!-- Spring Boot Starter Data JPA -->
+
     </dependencies>
     <dependencyManagement>
         <dependencies>
