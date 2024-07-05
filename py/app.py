@@ -1,10 +1,9 @@
 from flask import Flask, request, jsonify
 import mysql.connector
 from flask_cors import CORS
-from datetime import datetime
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Database configuration
 db_config = {
@@ -109,6 +108,11 @@ def get_all_hospitals():
         query = "SELECT * FROM hospital"
         cursor.execute(query)
         hospitals = cursor.fetchall()
+
+        # Convert businessHours to string format if necessary
+        for hospital in hospitals:
+            if 'businessHours' in hospital and isinstance(hospital['businessHours'], bytes):
+                hospital['businessHours'] = hospital['businessHours'].decode('utf-8')
 
         cursor.close()
         conn.close()
