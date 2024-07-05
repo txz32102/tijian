@@ -14,11 +14,10 @@ db_config = {
     'database': 'tijian'
 }
 
-# Endpoint for user login
 @app.route('/user/login', methods=['POST'])
 def login():
-    user_id = request.form.get('userId')
-    password = request.form.get('password')
+    user_id = request.args.get('userId')
+    password = request.args.get('password')
     
     if not user_id or not password:
         return jsonify({'code': 4000, 'message': 'User ID and password are required'}), 400
