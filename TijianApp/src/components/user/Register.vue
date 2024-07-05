@@ -110,56 +110,69 @@
 
 	//////声明方法或函数//////
 	//声明一个失去焦点的事件:用于检查用户号是否存在
-	const checkUserId = () => {
-		axios
-			.post(
-				"user/judge",
-				//post方法:需要json工具将js对象转成后端能接收传参方式的数据,后端会通过userId参数取值
-				//userId=10008&password=123
-				qs.stringify({
-					userId: user.value.userId
-				})
-			)
-			.then((response) => { //获取后端传回的数据resultvo,拿后端数据为response.data
-				if (response.data.code == 1001) {
-					//response.msg
-					alert("用户Id已存在");
-				}
+//////声明方法或函数//////
+//声明一个失去焦点的事件:用于检查用户号是否存在
+const checkUserId = () => {
+	// Log the data being sent to the backend
+	console.log("Data sent to backend for checkUserId:", {
+		userId: user.value.userId
+	});
+
+	axios
+		.post(
+			"user/judge",
+			//post方法:需要json工具将js对象转成后端能接收传参方式的数据,后端会通过userId参数取值
+			//userId=10008&password=123
+			qs.stringify({
+				userId: user.value.userId
 			})
-			.catch((error) => {
-			});
-	};
-	//点击按钮,执行注册
-	const register = () => {
-		//注册前做校验
-		if (user.value.userId == "") {
-			alert("用户Id不能为空！");
-			return;
-		}
-		if (user.value.password == "") {
-			alert("密码不能为空！");
-			return;
-		}
-		if (user.value.password != confirmPassword.value) {
-			alert("两次输入的密码不一致！");
-			return;
-		}
-		//注册请求
-		//post方法:需要使用json工具qs将js对象转换成带参数方式username=tom&password=123&gender=男
-		axios
-			.post("user/register", qs.stringify(user.value))
-			.then((response) => { //resultvo:{code:xxx,data:{   },msg:xxx}
-				if (response.data.code == 1000) { //拿后端数据为response.data
-					alert("注册成功!");
-				} else {
-					alert("注册失败!");
-				}
-			})
-			.catch((error) => {
-				console.error("请求有误");
-			});
-		//register结束	
-	};
+		)
+		.then((response) => { //获取后端传回的数据resultvo,拿后端数据为response.data
+			if (response.data.code == 1001) {
+				//response.msg
+				alert("用户Id已存在");
+			}
+		})
+		.catch((error) => {
+		});
+};
+
+//点击按钮,执行注册
+const register = () => {
+	//注册前做校验
+	if (user.value.userId == "") {
+		alert("用户Id不能为空！");
+		return;
+	}
+	if (user.value.password == "") {
+		alert("密码不能为空！");
+		return;
+	}
+	if (user.value.password != confirmPassword.value) {
+		alert("两次输入的密码不一致！");
+		return;
+	}
+
+	// Log the data being sent to the backend
+	console.log("Data sent to backend for register:", user.value);
+
+	//注册请求
+	//post方法:需要使用json工具qs将js对象转换成带参数方式username=tom&password=123&gender=男
+	axios
+		.post("user/register", qs.stringify(user.value))
+		.then((response) => { //resultvo:{code:xxx,data:{   },msg:xxx}
+			if (response.data.code == 1000) { //拿后端数据为response.data
+				alert("注册成功!");
+			} else {
+				alert("注册失败!");
+			}
+		})
+		.catch((error) => {
+			console.error("请求有误");
+		});
+	//register结束	
+};
+
 	//去登录
 	const login = () => {
 		router.push({

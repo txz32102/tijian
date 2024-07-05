@@ -14,18 +14,19 @@ db_config = {
     'database': 'tijian'
 }
 
+# Endpoint for user login
 @app.route('/user/login', methods=['POST'])
 def login():
     user_id = request.args.get('userId')
     password = request.args.get('password')
-    
+
     if not user_id or not password:
         return jsonify({'code': 4000, 'message': 'User ID and password are required'}), 400
 
     try:
         conn = mysql.connector.connect(**db_config)
         cursor = conn.cursor(dictionary=True)
-        
+
         query = "SELECT * FROM user WHERE userId = %s AND password = %s"
         cursor.execute(query, (user_id, password))
         user = cursor.fetchone()
@@ -49,12 +50,13 @@ def login():
         print(f"Error: {err}")
         return jsonify({'code': 5000, 'message': str(err)}), 500
 
+
 # Endpoint for user registration
 @app.route('/user/register', methods=['POST'])
 def register():
     try:
         user_data = request.form.to_dict()
-        
+
         required_fields = ['userId', 'password', 'realName', 'gender', 'identityCard', 'birthday', 'userType']
         if not all(field in user_data for field in required_fields):
             return jsonify({'code': 4000, 'message': 'Missing required fields'}), 400
@@ -74,13 +76,13 @@ def register():
         existing_user = cursor.fetchone()
         if existing_user:
             return jsonify({'code': 1001, 'message': 'User ID already exists'}), 400
-        
+
         insert_query = """
         INSERT INTO user (userId, password, realName, gender, identityCard, birthday, userType)
         VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
         cursor.execute(insert_query, (
-            user_data['userId'], user_data['password'], user_data['realName'], 
+            user_data['userId'], user_data['password'], user_data['realName'],
             user_data['gender'], user_data['identityCard'], user_data['birthday'], user_data['userType']
         ))
         conn.commit()
@@ -95,6 +97,47 @@ def register():
     except Exception as e:
         print(f"Error: {e}")
         return jsonify({'code': 5000, 'message': str(e)}), 500
+
+
+# Endpoint for fetching all hospitals
+@app.route('/hospital/getAll', methods=['GET'])
+def get_all_hospitals():
+    try:
+        conn = mysql.connector.connect(**db_config)
+        cursor = conn.cursor(dictionary=True)
+
+        query = "SELECT * FROM hospital"
+        cursor.execute(query)
+        hospitals = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+        return jsonify(hospitals)
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return jsonify({'code': 5000, 'message': str(err)}), 500
+
+
+# Endpoint for fetching all set meals
+@app.route('/setmeal/getAll', methods=['GET'])
+def get_all_setmeals():
+    try:
+        conn = mysql.connector.connect(**db_config)
+        cursor = conn.cursor(dictionary=True)
+
+        query = "SELECT * FROM setmeal"
+        cursor.execute(query)
+        setmeals = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+        return jsonify({'code': 1000, 'data': setmeals})
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return jsonify({'code': 5000, 'message': str(err)}), 500
+
 
 if __name__ == '__main__':
     app.run(port=9080, debug=True)

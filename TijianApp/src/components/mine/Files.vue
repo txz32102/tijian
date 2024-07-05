@@ -51,19 +51,23 @@
 	const axios = inject('axios');
 
 	onMounted(() => {
-		let userId = getLocal('userId');
-		axios.get('reports/query?userId=' + userId).then((res) => {
-			if (res.data.code == 1000) {
-				list.value = res.data.data;
-				list.value.forEach((l)=>{
-					let temp = new Date(l.orderDate);
-					l.orderDate = getDateStr(temp);
-				})
-			}
-		}).catch((error)=>{
-			console.log(error);
-		})
-	});
+    let userId = getLocal('userId');
+    const reportUrl = 'reports/query?userId=' + userId;
+    console.log('Fetching reports from URL:', reportUrl);
+    
+    axios.get(reportUrl).then((res) => {
+        if (res.data.code == 1000) {
+            list.value = res.data.data;
+            list.value.forEach((l)=>{
+                let temp = new Date(l.orderDate);
+                l.orderDate = getDateStr(temp);
+            })
+        }
+    }).catch((error)=>{
+        console.log(error);
+    });
+});
+
 
 	// 创建路由跳转对象
 	const router = useRouter();
